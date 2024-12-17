@@ -8,6 +8,8 @@ import (
 	"os"
 
 	"a21hc3NpZ25tZW50/service"
+	"a21hc3NpZ25tZW50/database"
+	"a21hc3NpZ25tZW50/handlers"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -37,9 +39,16 @@ func main() {
 	if token == "" {
 		log.Fatal("HUGGINGFACE_TOKEN is not set in the .env file")
 	}
+	// Initialize the database
+	database.InitDB()
+	defer database.CloseDB()
 
 	// Set up the router
 	router := mux.NewRouter()
+
+	// Register routes
+	router.HandleFunc("/register", handlers.RegisterHandler).Methods("POST")
+	router.HandleFunc("/login", handlers.LoginHandler).Methods("POST")
 
 	// File upload endpoint
 	router.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
@@ -59,15 +68,13 @@ func main() {
 		defer file.Close()
 
 		// Read the file content
-		fileContent := make([]byte, 0)
-		fileContent, err = io.ReadAll(file)
+		fileContent, err := io.ReadAll(file)
 		if err != nil {
 			http.Error(w, "Unable to read file", http.StatusInternalServerError)
 			return
 		}
-
 		// Retrieve the custom query from the form
-		query := r.FormValue("fileQuery")
+		query := r.FormValue("query")
 		if query == "" {
 			http.Error(w, "Query is required", http.StatusBadRequest)
 			return

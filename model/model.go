@@ -19,3 +19,9 @@ type TapasResponse struct {
 type ChatResponse struct {
 	GeneratedText string `json:"generated_text"`
 }
+
+type User struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}

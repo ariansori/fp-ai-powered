@@ -17,8 +17,6 @@ type AIService struct {
 	Client HTTPClient
 }
 
-// AnalyzeData mengirimkan permintaan ke endpoint AI untuk menganalisis data tabel berdasarkan query.
-// AnalyzeData mengirimkan permintaan ke endpoint AI untuk menganalisis data tabel berdasarkan query.
 func (s *AIService) AnalyzeData(table map[string][]string, query, token string) (string, error) {
     if len(table) == 0 {
         return "", errors.New("table is empty")
@@ -63,31 +61,18 @@ func (s *AIService) AnalyzeData(table map[string][]string, query, token string) 
         return "", errors.New("failed to unmarshal response: " + err.Error())
     }
 
-    // Log respons API untuk debugging
-    // fmt.Printf("Debug: Response from API: %v\n", tapasResponse)
-
-    // Validasi struktur respons dan ambil data
-    cells, exists := tapasResponse["cells"].([]interface{})
-    if !exists || len(cells) == 0 {
-        return "", errors.New("no valid answer found in the response")
+    answer, exists := tapasResponse["cells"].([]interface{})
+    if !exists {
+        return "", errors.New("no answer found in the response")
     }
-
-    // Validasi tipe data elemen pertama
-    answer, ok := cells[0].(string)
-    if !ok {
-        return "", errors.New("answer is not a valid string")
+    // Assuming the result is a string within the cells array
+    if len(answer) > 0 {
+        return answer[0].(string), nil
     }
-
-    return answer, nil
+    
+    return "", errors.New("no valid answer in the response")
 }
 
-
-// ChatWithAI mengirimkan permintaan ke endpoint AI untuk mendapatkan respon berbasis konteks dan query.
-
-// ChatWithAI mengirimkan permintaan ke model Phi-3.5-mini-instruct di Hugging Face
-
-
-// ChatWithAI mengirimkan permintaan ke model Phi-3.5-mini-instruct di Hugging Face
 func (s *AIService) ChatWithAI(context, query, token string) (model.ChatResponse, error) {
     input := context + "\n" + query
     requestBody := map[string]string{

@@ -28,15 +28,13 @@ func (s *FileService) ProcessFile(fileContent string) (map[string][]string, erro
     headers := records[0]
 
     for _, row := range records[1:] {
-        if len(row) != len(headers) {
-            return nil, errors.New("row length does not match header length")
-        }
-
-        for i, value := range row {
-            header := headers[i]
-            result[header] = append(result[header], strings.TrimSpace(value))
-        }
-    }
-
-    return result, nil
+		for i, value := range row {
+			// Ensure the column index exists in the header
+			if i < len(headers) {
+				header := headers[i]
+				result[header] = append(result[header], value)
+			}
+		}
+	}
+	return result, nil
 }
